@@ -12,25 +12,26 @@
     {
       "binding": "DB",
       "database_name": "hop-license",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "b51fb8fd-6790-49c6-bec0-fe3498364a16",
       "migrations_dir": "./migrations"
     }
   ],
 
-  // Requires: wrangler email sending enable <your-domain>
-  // FROM_EMAIL below must be an address at that domain.
-  "send_email": [{ "name": "EMAIL" }],
-
+  // Email sends via Resend's REST API (see src/mailer.ts), not Cloudflare's
+  // own Email Sending — that requires the Workers Paid plan, this doesn't.
+  // FROM_EMAIL must be on a domain verified in your Resend account.
   "vars": {
     // The address verification links point back to. Update after your
     // first `wrangler deploy` (or set a custom domain / route instead).
-    "SERVICE_URL": "https://hop-license.<your-subdomain>.workers.dev",
-    "FROM_EMAIL": "consent@yourdomain.com",
+    "SERVICE_URL": "https://hop-license.samuel-banapour100.workers.dev",
+    "FROM_EMAIL": "consent@soloappsstudio.com",
     "FROM_NAME": "hop"
   }
 
   // Secrets (never in this file — set with `wrangler secret put <NAME>`):
-  //   HOP_LICENSE_SEED   base64 of the Ed25519 signing key's 32-byte seed
-  //                      (the first 32 bytes of hoplicense.key — see
-  //                      tools/hoplicense's `seed` subcommand)
+  //   HOP_LICENSE_SEED    base64 of the Ed25519 signing key's 32-byte seed
+  //                       (the first 32 bytes of hoplicense.key — see
+  //                       tools/hoplicense's `seed` subcommand)
+  //   RESEND_API_KEY      from resend.com — Domains → verify soloappsstudio.com,
+  //                       then API Keys → create (a sending-only key is enough)
 }

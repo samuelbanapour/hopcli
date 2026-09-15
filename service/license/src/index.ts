@@ -1,14 +1,15 @@
 import { isGovDomain } from "./govdomains";
+import { sendMail } from "./mailer";
 import { TERMS_TEXT, TERMS_VERSION, termsHash } from "./terms";
 import { signToken } from "./token";
 
 export interface Env {
   DB: D1Database;
-  EMAIL: SendEmail;
   SERVICE_URL: string;
   FROM_EMAIL: string;
   FROM_NAME: string;
   HOP_LICENSE_SEED: string;
+  RESEND_API_KEY: string;
 }
 
 interface AcceptanceRow {
@@ -101,9 +102,8 @@ async function handleAccept(req: Request, env: Env): Promise<Response> {
     .run();
 
   const verifyURL = `${env.SERVICE_URL}/verify?req=${id}&code=${verifyCode}`;
-  await env.EMAIL.send({
+  await sendMail(env, {
     to: email,
-    from: { email: env.FROM_EMAIL, name: env.FROM_NAME },
     subject: "Confirm your hop consent",
     text: `Hi ${name},\n\nConfirm you agreed to hop's terms (version ${TERMS_VERSION}) by opening this link:\n\n${verifyURL}\n\nIf you didn't request this, ignore this email.`,
     html: `<p>Hi ${escapeHtml(name)},</p><p>Confirm you agreed to hop's terms (version ${TERMS_VERSION}) by opening this link:</p><p><a href="${verifyURL}">${verifyURL}</a></p><p>If you didn't request this, ignore this email.</p>`,

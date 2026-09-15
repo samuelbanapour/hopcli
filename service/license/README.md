@@ -33,8 +33,10 @@ npx wrangler d1 create hop-license
 
 npx wrangler d1 migrations apply hop-license --remote
 
-# 2. Email sending — FROM_EMAIL in wrangler.jsonc must be on this domain
-npx wrangler email sending enable yourdomain.com
+# 2. Email — via Resend's API (src/mailer.ts), not Cloudflare's own Email
+#    Sending, which requires the Workers Paid plan. Verify your domain at
+#    resend.com/domains, create a sending API key, then:
+echo "<your resend api key>" | npx wrangler secret put RESEND_API_KEY
 
 # 3. Signing key — the seed from the SAME keypair internal/core/license.go
 #    already has the public half of (see tools/hoplicense). Never let this
