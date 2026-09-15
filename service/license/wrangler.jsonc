@@ -25,7 +25,7 @@
     // first `wrangler deploy` (or set a custom domain / route instead).
     "SERVICE_URL": "https://hop-license.samuel-banapour100.workers.dev",
     "FROM_EMAIL": "consent@soloappsstudio.com",
-    "FROM_NAME": "hop"
+    "FROM_NAME": "HopCLI Verification"
   }
 
   // Secrets (never in this file — set with `wrangler secret put <NAME>`):

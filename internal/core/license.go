@@ -17,10 +17,10 @@ import (
 )
 
 // LicenseServiceURL is where `hop license accept` requests a consent token
-// from — the self-service counterpart to a manually issued one. Empty by
-// default; override with HOP_LICENSE_SERVICE_URL, or set a compiled-in
-// default here once the service (see service/license) is deployed.
-const licenseServiceURLDefault = ""
+// from — the self-service counterpart to a manually issued one. Override
+// with HOP_LICENSE_SERVICE_URL if you deploy your own instance of
+// service/license elsewhere.
+const licenseServiceURLDefault = "https://hop-license.samuel-banapour100.workers.dev"
 
 // LicenseServiceURL resolves the configured service base URL, if any.
 func LicenseServiceURL() string {
