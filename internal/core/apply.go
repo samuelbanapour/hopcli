@@ -160,7 +160,12 @@ func Apply(ctx context.Context, l *Layout, cur *Generation, plan *Plan, opts App
 			failures = append(failures, StepFailure{Name: s.Name, Err: errors.New("internal: download result missing")})
 			continue
 		}
-		entry, err := Materialise(l, s.Recipe, s.Artifact, s.Platform, f.Path, f.SHA256(), depLoc)
+		var entry *StoreEntry
+		err := retryUntilSpace(ctx, opts.Sink, s.Name, func() error {
+			var merr error
+			entry, merr = Materialise(l, s.Recipe, s.Artifact, s.Platform, f.Path, f.SHA256(), depLoc)
+			return merr
+		})
 		if err != nil {
 			failures = append(failures, StepFailure{Name: s.Name, Err: err})
 			continue

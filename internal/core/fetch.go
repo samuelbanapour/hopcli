@@ -211,7 +211,7 @@ func FetchAll(ctx context.Context, client *http.Client, l *Layout, reqs []*Fetch
 			}
 
 			bar := sink.Bar(r.Name, r.Size)
-			res := fetchOne(ctx, client, l, r, bar)
+			res := fetchOne(ctx, client, l, r, bar, sink)
 			results[i] = res
 
 			switch {
@@ -230,7 +230,7 @@ func FetchAll(ctx context.Context, client *http.Client, l *Layout, reqs []*Fetch
 
 // fetchOne downloads and verifies a single artifact, retrying transient
 // failures with backoff.
-func fetchOne(ctx context.Context, client *http.Client, l *Layout, r *FetchRequest, bar BarHandle) *FetchResult {
+func fetchOne(ctx context.Context, client *http.Client, l *Layout, r *FetchRequest, bar BarHandle, sink Sink) *FetchResult {
 	dst := downloadPath(l, r)
 	algo, want := r.pinnedDigest()
 
@@ -259,7 +259,13 @@ func fetchOne(ctx context.Context, client *http.Client, l *Layout, r *FetchReque
 			}
 		}
 
-		d, size, err := download(ctx, client, r, dst, bar)
+		var d digests
+		var size int64
+		err := retryUntilSpace(ctx, sink, r.Name, func() error {
+			var derr error
+			d, size, derr = download(ctx, client, r, dst, bar)
+			return derr
+		})
 		if err == nil {
 			got := d.get(algo)
 			if want != "" && !strings.EqualFold(got, want) {
@@ -334,8 +340,7 @@ func download(ctx context.Context, client *http.Client, r *FetchRequest, dst str
 	// Preflight: refuse to start a download that cannot possibly fit.
 	if resp.ContentLength > 0 {
 		if free, err := freeSpace(filepath.Dir(dst)); err == nil && free > 0 && resp.ContentLength+(64<<20) > free {
-			return digests{}, 0, fmt.Errorf("need %s but only %s is free on %s",
-				humanBytes(resp.ContentLength), humanBytes(free), filepath.Dir(dst))
+			return digests{}, 0, &InsufficientSpaceError{Need: resp.ContentLength + (64 << 20), Free: free, Path: filepath.Dir(dst)}
 		}
 	}
 

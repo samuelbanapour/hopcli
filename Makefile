@@ -1,8 +1,8 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.1.0-dev)
 REVISION ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 LDFLAGS := -s -w \
-  -X github.com/sammybanapour/hop/internal/core.Version=$(VERSION) \
-  -X github.com/sammybanapour/hop/internal/core.Revision=$(REVISION)
+  -X github.com/samuelbanapour/hopcli/internal/core.Version=$(VERSION) \
+  -X github.com/samuelbanapour/hopcli/internal/core.Revision=$(REVISION)
 
 .PHONY: build install test vet fmt index clean
 
